@@ -321,7 +321,6 @@ def make_finger_controller():
     fingers = ["Hand.R","Thumb3.R", "Index3.R", "Index2.R", "Index1.R", "Middle3.R", "Middle2.R", "Middle1.R", "Ring3.R", "Ring2.R", "Ring1.R", "Pinky3.R", "Pinky2.R", "Pinky1.R"]
     for finger in fingers:
         set_fingers_to_controller(finger)
-    
 
 def set_fingers_to_controller(finger_name):
     bpy.ops.object.mode_set(mode='POSE')    
@@ -447,6 +446,39 @@ def apply_constraints_original():
     IK_constraint.chain_count = 2
     IK_constraint.pole_angle = get_degrees(-30)
 
+def algin_leg_bones():
+    # Get the armature object
+    armature = bpy.data.objects.get("Armature")
+    bone_names = ['Thigh.R', 'ThighTwist01.R', 'ThighTwist02.R', 'Calf.R', 'CalfTwist01.R', 'CalfTwist02.R', 'Foot.R','ToeBaseShareBone.R']
+
+    if armature and armature.type == 'ARMATURE':
+        # Set the armature as the active object
+        bpy.context.view_layer.objects.active = armature
+        bpy.ops.object.mode_set(mode='EDIT')
+
+        # Deselect all bones
+        bpy.ops.armature.select_all(action='DESELECT')
+
+        # Iterate through each bone in the array and select it
+        for bone_name in bone_names:
+            # Check if the bone exists
+            if bone_name in armature.data.edit_bones:
+                bone = armature.data.edit_bones[bone_name]
+                bone.select = True
+
+        # Switch to Object mode and then back to Edit mode to apply selection changes
+        bpy.ops.object.mode_set(mode='OBJECT')
+        bpy.ops.object.mode_set(mode='EDIT')
+
+        # Scale the selected bones to 0 in the global X-axis
+        bpy.ops.transform.resize(value=(0, 1, 1), orient_type='GLOBAL')
+
+        bpy.ops.object.mode_set(mode='OBJECT')
+    else:
+        print("Armature not found or is not of type 'ARMATURE'")
+
+# Test the function
+
 def button2_macro():
     armature_obj = bpy.context.active_object
     armature = armature_obj.data
@@ -455,6 +487,7 @@ def button2_macro():
     snap_bones(armature)
     connect_bones(armature)
     reset_bone_roll(armature)
+    algin_leg_bones()
 
 def button3_macro(armature_obj):
         make_controllers()
